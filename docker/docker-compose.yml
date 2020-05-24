@@ -1,0 +1,46 @@
+version: '2'
+services:
+  ex2-nginx:
+    build: ./nginx
+    ports:
+      - '80:80'
+      - '443:443'
+    env_file:
+      - ../env/nginx.env
+    depends_on:
+      - ex2-php-fpm
+    volumes:
+      - /etc/hosts:/etc/hosts
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
+      - ../htdocs:/var/www
+      - ../logs/nginx:/var/log/nginx
+  ex2-php-fpm:
+    build: ./php
+    env_file:
+      - ../env/php-fpm.env
+    depends_on:
+      - ex2-mysql
+      - ex2-mailhog
+    volumes:
+      - /etc/hosts:/etc/hosts
+      - ./php/php.ini:/usr/local/etc/php/conf.d/php.ini
+      - ../htdocs:/var/www
+      - ../logs/php:/var/log
+      - ../tmp/php:/tmp
+      - ../tmp/sessions:/sessions
+  ex2-mysql:
+    build: ./mysql
+    ports:
+      - '3306:3306'
+    env_file:
+      - ../env/mysql.env
+    volumes:
+      - /etc/hosts:/etc/hosts
+      - ./mysql/my.cnf:/etc/mysql/conf.d/my.cnf
+      - ./mysql/db:/var/lib/mysql
+      - ../logs/mysql:/var/log
+  ex2-mailhog:
+      image: mailhog/mailhog:v1.0.0
+      ports:
+        - '1025:1025'
+        - '8025:8025'
